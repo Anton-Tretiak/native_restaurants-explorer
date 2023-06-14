@@ -6,7 +6,9 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
+  FlatList,
 } from 'react-native';
+import { Button } from 'react-native-elements';
 
 import { Article } from '../../Types/Article';
 import NewsAPI from '../../API/NewsAPI';
@@ -15,14 +17,25 @@ import { ArticlesItem } from '../ArticlesItem/ArticlesItem';
 
 type Props = {
   searchedText: string;
+  currentPage: number;
+  onCurrentPageChange: (value: number) => void;
 };
 
-export const ArticlesList: React.FC<Props> = ({ searchedText }) => {
+export const ArticlesList: React.FC<Props> = React.memo((
+  {
+    searchedText,
+    currentPage,
+    onCurrentPageChange
+  }
+) => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  
+  //modal
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  //pagination
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 10;
   
   const handleArticlePress = (article: Article) => {
     setSelectedArticle(article);
@@ -36,19 +49,37 @@ export const ArticlesList: React.FC<Props> = ({ searchedText }) => {
   
   useEffect(() => {
     getArticles();
-  }, [searchedText]);
+  }, [searchedText, currentPage]);
   
   const getArticles = async () => {
     setIsLoading(true);
+    
     try {
       const fetchedArticles = await NewsAPI.fetchArticles(searchedText);
       
-      setArticles(fetchedArticles);
+      const totalPages = Math.ceil(fetchedArticles.length / itemsPerPage);
+      setTotalPages(totalPages);
+      
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = currentPage * itemsPerPage;
+      const articlesForCurrentPage = fetchedArticles.slice(startIndex, endIndex);
+      
+      setArticles(articlesForCurrentPage);
     } catch (error) {
       console.error('Error fetching articles:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const renderArticleItem = ({ item }: { item: Article }) => {
+    const readableDate = item.publishedAt.split('T')[0];
+    
+    return (
+      <TouchableOpacity onPress={() => handleArticlePress(item)}>
+        <ArticlesItem article={item} readableDate={readableDate} />
+      </TouchableOpacity>
+    );
   };
   
   if (isLoading) {
@@ -58,29 +89,31 @@ export const ArticlesList: React.FC<Props> = ({ searchedText }) => {
       </View>
     );
   }
+  console.log(currentPage);
+  console.log(totalPages);
   
   return (
     <View style={styles.container}>
-      {articles.length > 0
-        ? (articles.map(article => {
-          return (
-            <TouchableOpacity
-              key={article.url}
-              onPress={() => handleArticlePress(article)}
-            >
-              <ArticlesItem article={article} />
-            </TouchableOpacity>
-          );
-        }))
-        : (
-          <Text style={styles.text}>Nothing found! Check your input.</Text>
-        )
-      }
-      <Modal
-        visible={isModalVisible}
-        onRequestClose={closeModal}
-        animationType="slide"
-      >
+      {articles.length > 0 ? (
+        <>
+          <FlatList
+            data={articles}
+            renderItem={renderArticleItem}
+            keyExtractor={(item) => item.url}
+          />
+          {currentPage < totalPages && currentPage !== 10 && (
+            <Button
+              title="Next"
+              onPress={() => onCurrentPageChange(currentPage + 1)}
+              buttonStyle={styles.button}
+            />
+          )}
+        </>
+      ) : (
+        <Text style={styles.text}>Nothing found! Check your input.</Text>
+      )}
+      
+      <Modal visible={isModalVisible} onRequestClose={closeModal} animationType="slide">
         <View style={styles.modalContainer}>
           {selectedArticle && (
             <View>
@@ -97,7 +130,7 @@ export const ArticlesList: React.FC<Props> = ({ searchedText }) => {
       </Modal>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -112,6 +145,11 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
+  },
+  button: {
+    backgroundColor: '#6fbbd3',
+    padding: 10,
+    borderRadius: 5,
   },
   modalContainer: {
     flex: 1,

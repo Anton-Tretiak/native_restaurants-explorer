@@ -8,6 +8,7 @@ import { ArticlesList } from './src/components/ArticlesList/ArticlesList';
 export default function App() {
   const [inputText, setInputText] = useState('');
   const [searchedText, setSearchedText] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   
   const handleInputChange = (value) => {
     setInputText(value);
@@ -16,7 +17,12 @@ export default function App() {
   const handleButtonClick = () => {
     if (inputText) {
       setSearchedText(inputText.toLowerCase());
+      setCurrentPage(1);
     }
+  };
+  
+  const handleCurrentPageChange = (value) => {
+    setCurrentPage(value);
   };
   
   return (
@@ -29,11 +35,11 @@ export default function App() {
           onButtonClick={handleButtonClick}
         />
         {searchedText && (
-          <ScrollView>
-            <ArticlesList
-              searchedText={searchedText}
-            />
-          </ScrollView>
+          <ArticlesList
+            searchedText={searchedText}
+            currentPage={currentPage}
+            onCurrentPageChange={handleCurrentPageChange}
+          />
         )}
       </View>
     </>

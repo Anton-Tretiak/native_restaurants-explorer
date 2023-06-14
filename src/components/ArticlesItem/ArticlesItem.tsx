@@ -4,10 +4,9 @@ import { Text, View, StyleSheet } from "react-native";
 
 type Props = {
   article: Article;
+  readableDate: string;
 };
-export const ArticlesItem: React.FC<Props> = ({ article }) => {
-  const readableDate = article.publishedAt.split('T')[0];
-  
+export const ArticlesItem: React.FC<Props> = ({ article, readableDate  }) => {
   return (
     <View
       key={article.url}
