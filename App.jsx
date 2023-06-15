@@ -1,22 +1,22 @@
 import { useState } from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Header } from './src/components/Header/Header';
 import { SearchForm } from './src/components/SearchForm/SearchForm';
 import { ArticlesList } from './src/components/ArticlesList/ArticlesList';
 
 export default function App() {
-  const [inputText, setInputText] = useState('');
+  const [query, setQuery] = useState('');
   const [searchedText, setSearchedText] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   
   const handleInputChange = (value) => {
-    setInputText(value);
+    setQuery(value);
   };
   
   const handleButtonClick = () => {
-    if (inputText) {
-      setSearchedText(inputText.toLowerCase());
+    if (query) {
+      setSearchedText(query.toLowerCase());
       setCurrentPage(1);
     }
   };

@@ -4,7 +4,6 @@ import {
   Text,
   ActivityIndicator,
   StyleSheet,
-  Modal,
   TouchableOpacity,
   FlatList,
 } from 'react-native';
@@ -14,6 +13,7 @@ import { Article } from '../../Types/Article';
 import NewsAPI from '../../API/NewsAPI';
 
 import { ArticlesItem } from '../ArticlesItem/ArticlesItem';
+import { ArticleModal } from '../ArticleModal/ArticleModal';
 
 type Props = {
   searchedText: string;
@@ -85,12 +85,13 @@ export const ArticlesList: React.FC<Props> = React.memo((
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6fbbd3  " />
+        <ActivityIndicator size="large" color="#6fbbd3" />
       </View>
     );
   }
   console.log(currentPage);
   console.log(totalPages);
+  console.log('----------------');
   
   return (
     <View style={styles.container}>
@@ -113,21 +114,11 @@ export const ArticlesList: React.FC<Props> = React.memo((
         <Text style={styles.text}>Nothing found! Check your input.</Text>
       )}
       
-      <Modal visible={isModalVisible} onRequestClose={closeModal} animationType="slide">
-        <View style={styles.modalContainer}>
-          {selectedArticle && (
-            <View>
-              <Text style={styles.modalTitle}>{selectedArticle.title}</Text>
-              <Text style={styles.modalDescription}>{selectedArticle.description}</Text>
-              <Text style={styles.modalDate}>{selectedArticle.publishedAt}</Text>
-              
-              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-      </Modal>
+      <ArticleModal
+        isModalVisible={isModalVisible}
+        onCloseModal={closeModal}
+        selectedArticle={selectedArticle}
+      />
     </View>
   );
 });
@@ -150,37 +141,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#6fbbd3',
     padding: 10,
     borderRadius: 5,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingHorizontal: 10,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 50,
-    color: 'white',
-  },
-  modalDescription: {
-    color: 'white',
-  },
-  modalDate: {
-    fontSize: 16,
-    marginBottom: 20,
-    color: 'white',
-  },
-  closeButton: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#6fbbd3',
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center'
   },
 });
