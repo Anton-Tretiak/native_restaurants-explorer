@@ -3,9 +3,9 @@ import {
   View,
   Text,
   ActivityIndicator,
-  StyleSheet,
   TouchableOpacity,
   FlatList,
+  StyleSheet,
 } from 'react-native';
 import { Button } from 'react-native-elements';
 
@@ -18,14 +18,18 @@ import { ArticleModal } from '../ArticleModal/ArticleModal';
 type Props = {
   searchedText: string;
   currentPage: number;
+  sortValue: string;
   onCurrentPageChange: (value: number) => void;
+  onArticlesLength: () => void;
 };
 
 export const ArticlesList: React.FC<Props> = React.memo((
   {
     searchedText,
     currentPage,
-    onCurrentPageChange
+    sortValue,
+    onCurrentPageChange,
+    onArticlesLength,
   }
 ) => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -49,13 +53,13 @@ export const ArticlesList: React.FC<Props> = React.memo((
   
   useEffect(() => {
     getArticles();
-  }, [searchedText, currentPage]);
+  }, [searchedText, currentPage, sortValue]);
   
   const getArticles = async () => {
     setIsLoading(true);
     
     try {
-      const fetchedArticles = await NewsAPI.fetchArticles(searchedText);
+      const fetchedArticles = await NewsAPI.fetchArticles(searchedText, sortValue);
       
       const totalPages = Math.ceil(fetchedArticles.length / itemsPerPage);
       setTotalPages(totalPages);
@@ -82,16 +86,17 @@ export const ArticlesList: React.FC<Props> = React.memo((
     );
   };
   
+  if (articles.length > 0) {
+    onArticlesLength();
+  }
+  
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6fbbd3" />
+        <ActivityIndicator size="large" color="#6fbbd3"/>
       </View>
     );
   }
-  console.log(currentPage);
-  console.log(totalPages);
-  console.log('----------------');
   
   return (
     <View style={styles.container}>

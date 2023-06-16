@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, StyleSheet, Text, TouchableOpacity, View, Linking } from 'react-native';
 
 import { Article } from '../../Types/Article';
 
@@ -22,6 +22,12 @@ export const ArticleModal: React.FC<Props> = ({ isModalVisible, onCloseModal, se
     formattedDate = `${day}.${month}.${year}, ${hours}:${minutes}`;
   }
   
+  const handleLinkPress = () => {
+    if (selectedArticle) {
+      Linking.openURL(`${selectedArticle.url}`);
+    }
+  };
+  
   return (
     <Modal visible={isModalVisible} onRequestClose={onCloseModal} animationType="slide">
       <View style={styles.modalContainer}>
@@ -34,6 +40,10 @@ export const ArticleModal: React.FC<Props> = ({ isModalVisible, onCloseModal, se
             )}
             
             <Text style={styles.modalDescription}>{selectedArticle.description}</Text>
+            
+            <TouchableOpacity style={styles.detailsContainer} onPress={handleLinkPress}>
+              <Text style={styles.modalDetails}>Open in browser</Text>
+            </TouchableOpacity>
             
             <Text style={styles.modalAuthor}>Author: {selectedArticle.author}</Text>
             <Text style={styles.modalSource}>Source: {selectedArticle.source.name}</Text>
@@ -75,6 +85,21 @@ const styles = StyleSheet.create({
   modalDescription: {
     marginTop: 10,
     color: 'white',
+  },
+  detailsContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalDetails: {
+    padding: 10,
+    paddingRight: 7,
+    marginTop: 5,
+    color: 'white',
+    fontWeight: 'bold',
+    borderWidth: 2,
+    borderColor: '#6fbbd3',
+    borderRadius: 10,
   },
   modalAuthor: {
     color: 'white',
